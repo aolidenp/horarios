@@ -1,0 +1,1118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Horario — Ángel Omar</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface2: #1e2230;
+    --border: #2a2f40;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --accent: #5b8dee;
+    --accent2: #e8854a;
+    
+    /* Colores por año */
+    --c1: #4ade80;   /* 1° - verde */
+    --c2: #60a5fa;   /* 2° - azul */
+    --c3: #f472b6;   /* 3° - rosa */
+    --c4: #fb923c;   /* 4° - naranja */
+    --clib: #94a3b8; /* Libre */
+    --ctut: #a78bfa; /* Tutoría */
+    --ccol: #fbbf24; /* Hora colegiada */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .school-badge {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  #live-clock {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .header-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* ── MAIN ── */
+  main { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── AHORA CARD ── */
+  .now-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  .current-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .current-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-color, var(--accent));
+    border-radius: 3px 3px 0 0;
+  }
+  .card-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .card-class {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 4px;
+    color: var(--card-color, var(--text));
+  }
+  .card-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Barra de progreso */
+  .progress-wrap {
+    margin-bottom: 8px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--card-color, var(--accent));
+    border-radius: 100px;
+    transition: width 1s linear;
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+  }
+
+  /* Estado libre */
+  .free-card {
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1.5px dashed var(--border);
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .free-icon { font-size: 36px; margin-bottom: 8px; }
+  .free-label { font-size: 18px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .free-sub { font-size: 13px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  /* Siguiente clase */
+  .next-card {
+    background: var(--surface2);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .next-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--next-color, var(--muted));
+    flex-shrink: 0;
+  }
+  .next-info { flex: 1; }
+  .next-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .next-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 2px 0;
+  }
+  .next-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .next-countdown {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--next-color, var(--muted));
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── BOTÓN OBSERVACIÓN ── */
+  .obs-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1.5px solid var(--card-color, var(--border));
+    border-radius: 12px;
+    color: var(--card-color, var(--text));
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+  .obs-btn:active { opacity: 0.7; }
+
+  /* Resumen del día */
+  .day-section { margin-top: 20px; }
+  .section-title {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 12px;
+    border-left: 3px solid var(--item-color, var(--border));
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .timeline-item.current { opacity: 1; background: var(--surface2); }
+  .timeline-item.future { opacity: 1; }
+  .tl-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .tl-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .tl-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--item-color, var(--border));
+    flex-shrink: 0;
+  }
+
+  /* ── HORARIO COMPLETO ── */
+  .schedule-section { margin-bottom: 28px; }
+  .year-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .year-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .year-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .schedule-list { display: flex; flex-direction: column; gap: 6px; }
+  .sched-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--item-color, var(--border));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .sched-left { flex: 1; }
+  .sched-class { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .sched-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sched-day {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── MODAL NOTAS ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 100px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .modal-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .note-section { margin-bottom: 16px; }
+  .note-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .note-label span { font-size: 16px; }
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 80px;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+  .modal-save {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s;
+  }
+  .modal-save:active { opacity: 0.8; }
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--surface2);
+    border: none;
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Notitas guardadas */
+  .saved-note {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text);
+    margin-top: 6px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .saved-note-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .notes-preview {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .has-notes-badge {
+    background: var(--accent2);
+    color: #fff;
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    padding: 2px 7px;
+    border-radius: 100px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── SEMANA CHIP ── */
+  .day-chips {
+    display: flex; gap: 6px; margin-bottom: 16px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding-bottom: 2px;
+  }
+  .day-chips::-webkit-scrollbar { display: none; }
+  .day-chip {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .day-chip.active {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .no-class {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e2230;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 300;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="school-badge">UCV College 2026 · Turno Tarde</div>
+      <div class="header-name">Ángel Omar Oliden Pacherrez</div>
+    </div>
+    <div id="live-clock">--:--</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchView('now')">Ahora</button>
+  <button class="tab" onclick="switchView('day')">Mi Día</button>
+  <button class="tab" onclick="switchView('week')">Semana</button>
+  <button class="tab" onclick="switchView('full')">Horario</button>
+</div>
+
+<main>
+
+  <!-- ── VIEW: AHORA ── -->
+  <div class="view active" id="view-now">
+    <div class="now-date" id="now-date">—</div>
+    <div id="now-content"></div>
+    <div id="next-content"></div>
+    <div class="day-section">
+      <div class="section-title">Resto del día</div>
+      <div class="timeline" id="timeline-today"></div>
+    </div>
+  </div>
+
+  <!-- ── VIEW: DÍA ── -->
+  <div class="view" id="view-day">
+    <div class="day-chips" id="day-chips"></div>
+    <div class="timeline" id="timeline-day"></div>
+  </div>
+
+  <!-- ── VIEW: SEMANA ── -->
+  <div class="view" id="view-week">
+    <div id="week-content"></div>
+  </div>
+
+  <!-- ── VIEW: HORARIO COMPLETO ── -->
+  <div class="view" id="view-full">
+    <div id="full-content"></div>
+  </div>
+
+</main>
+
+<!-- Modal de notas -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-title" id="modal-title">Clase</div>
+    <div class="modal-subtitle" id="modal-subtitle">Hora</div>
+    <div class="note-section">
+      <div class="note-label"><span>📋</span> Observación general</div>
+      <textarea id="note-obs" placeholder="Ej: Revisamos comprensión lectora…" rows="3"></textarea>
+    </div>
+    <div class="note-section">
+      <div class="note-label"><span>⭐</span> Alumnos destacados</div>
+      <textarea id="note-dest" placeholder="Ej: Lucía, Mateo — excelente participación" rows="2"></textarea>
+    </div>
+    <div class="note-section">
+      <div class="note-label"><span>⚠️</span> Incidencias</div>
+      <textarea id="note-inc" placeholder="Ej: Altercado entre alumnos, papá de Juan vino…" rows="2"></textarea>
+    </div>
+    <button class="modal-save" onclick="saveNotes()">Guardar notas</button>
+    <div class="notes-preview" id="notes-preview"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ Guardado</div>
+
+<script>
+// ──────────────────────────────────────────────
+// DATOS DEL HORARIO
+// ──────────────────────────────────────────────
+const DAYS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const DAY_LABELS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// año → color CSS var
+function yearColor(cls) {
+  if (!cls || cls.includes('LIBRE') || cls.includes('DISPONIBILIDAD')) return 'var(--clib)';
+  if (cls.includes('TUTORÍA') || cls.includes('TUTORIA')) return 'var(--ctut)';
+  if (cls.includes('COLEGIADA')) return 'var(--ccol)';
+  if (cls.includes('ATENCIÓN') || cls.includes('ATENCION')) return 'var(--ccol)';
+  const m = cls.match(/(\d+)[°ºo]/);
+  if (m) {
+    const n = parseInt(m[1]);
+    if (n===1) return 'var(--c1)';
+    if (n===2) return 'var(--c2)';
+    if (n===3) return 'var(--c3)';
+    if (n===4) return 'var(--c4)';
+  }
+  return 'var(--clib)';
+}
+
+function yearNum(cls) {
+  if (!cls) return 0;
+  const m = cls.match(/(\d+)[°ºo]/);
+  return m ? parseInt(m[1]) : 0;
+}
+
+// Franjas horarias
+const SLOTS = [
+  { id:'s1', start:'13:10', end:'13:55', label:'Secundaria' },
+  { id:'s2', start:'13:55', end:'14:40', label:'Secundaria' },
+  { id:'s3', start:'14:40', end:'15:25', label:'Secundaria' },
+  { id:'rec',start:'15:25', end:'15:40', label:'RECREO' },
+  { id:'s4', start:'15:40', end:'16:25', label:'Secundaria' },
+  { id:'s5', start:'16:25', end:'17:10', label:'Secundaria' },
+  { id:'s6', start:'17:10', end:'17:55', label:'Secundaria' },
+  { id:'s7', start:'17:55', end:'18:40', label:'Secundaria' },
+];
+
+// Horario extraído de la imagen
+// horario[dia][slot] = nombre de clase o null
+const SCHEDULE = {
+  lunes: {
+    s1: '2° G SEC', s2: '2° F SEC', s3: '2° A SEC',
+    rec: null,
+    s4: '1° G SEC', s5: '1° B SEC', s6: '2° B SEC', s7: 'HORA COLEGIADA COMÚN'
+  },
+  martes: {
+    s1: 'TUTORÍA 1D SEC', s2: 'LIBRE DISPONIBILIDAD', s3: 'PLAN LECTOR 3° D SEC',
+    rec: null,
+    s4: '1° D SEC', s5: '2° D SEC', s6: 'ATENCIÓN A PP.FF', s7: '3° G SEC'
+  },
+  miercoles: {
+    s1: '3° A SEC', s2: 'LIBRE DISPONIBILIDAD', s3: '3° F SEC',
+    rec: null,
+    s4: '4° D SEC', s5: '2° C SEC', s6: '1° A SEC', s7: 'LIBRE DISPONIBILIDAD'
+  },
+  jueves: {
+    s1: '4° B SEC', s2: '1° C SEC', s3: '1° E SEC',
+    rec: null,
+    s4: '2° E SEC', s5: 'LIBRE DISPONIBILIDAD', s6: '4° C SEC', s7: '3° B SEC'
+  },
+  viernes: {
+    s1: '1° H SEC', s2: '2° H SEC', s3: '1° F SEC',
+    rec: null,
+    s4: '3° C SEC', s5: 'LIBRE DISPONIBILIDAD', s6: '4° A SEC', s7: '3° E SEC'
+  }
+};
+
+// El horario usa "PLAN LECTOR X° Y SEC" — simplifico a la sección
+// Para martes s1 era TUTORÍA. Resto son plan lector.
+// Normalizamos el display:
+function displayName(raw) {
+  if (!raw) return null;
+  if (raw.includes('LIBRE') || raw.includes('DISPONIBILIDAD')) return 'Libre disponibilidad';
+  if (raw.includes('COLEGIADA')) return 'Hora colegiada común';
+  if (raw.includes('PP.FF')) return 'Atención a PP.FF';
+  if (raw.includes('TUTORÍA') || raw.includes('TUTORIA')) {
+    return raw.replace('PLAN LECTOR ','').replace('TUTORIA','Tutoría').replace('TUTORÍA','Tutoría');
+  }
+  return 'Plan Lector — ' + raw.replace('PLAN LECTOR ','');
+}
+
+// ──────────────────────────────────────────────
+// TIEMPO
+// ──────────────────────────────────────────────
+function now() { return new Date(); }
+
+function toMinutes(hhmm) {
+  const [h,m] = hhmm.split(':').map(Number);
+  return h*60+m;
+}
+
+function currentMinutes() {
+  const d = now();
+  return d.getHours()*60+d.getMinutes()+d.getSeconds()/60;
+}
+
+function formatTime(hhmm) { return hhmm; }
+
+function minutesToHHMM(mins) {
+  const h = Math.floor(mins/60), m = Math.floor(mins%60);
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+
+function dayKey() {
+  const d = now().getDay(); // 0=dom
+  const map={1:'lunes',2:'martes',3:'miercoles',4:'jueves',5:'viernes'};
+  return map[d] || null;
+}
+
+function todaySlots(dkey) {
+  const sch = SCHEDULE[dkey];
+  if (!sch) return [];
+  return SLOTS.map(sl => ({
+    ...sl,
+    class: sch[sl.id] || null,
+    display: displayName(sch[sl.id])
+  }));
+}
+
+function currentSlot(slots) {
+  const cm = currentMinutes();
+  for (const sl of slots) {
+    if (sl.id==='rec') continue;
+    const s = toMinutes(sl.start), e = toMinutes(sl.end);
+    if (cm >= s && cm < e) return sl;
+  }
+  return null;
+}
+
+function nextSlot(slots) {
+  const cm = currentMinutes();
+  for (const sl of slots) {
+    if (sl.id==='rec') continue;
+    if (!sl.class || sl.class.includes('LIBRE')) continue;
+    const s = toMinutes(sl.start);
+    if (s > cm) return sl;
+  }
+  return null;
+}
+
+function progress(slot) {
+  const cm = currentMinutes();
+  const s = toMinutes(slot.start), e = toMinutes(slot.end);
+  return Math.min(100, Math.max(0, ((cm-s)/(e-s))*100));
+}
+
+function remaining(slot) {
+  const cm = currentMinutes();
+  const e = toMinutes(slot.end);
+  const diff = Math.max(0, e - cm);
+  const h = Math.floor(diff/60), m = Math.floor(diff%60);
+  if (h>0) return `${h}h ${m}min`;
+  return `${m} min`;
+}
+
+function untilStart(slot) {
+  const cm = currentMinutes();
+  const s = toMinutes(slot.start);
+  const diff = Math.max(0, s - cm);
+  const h = Math.floor(diff/60), m = Math.floor(diff%60);
+  if (h>0) return `en ${h}h ${m}min`;
+  return `en ${m} min`;
+}
+
+// ──────────────────────────────────────────────
+// RELOJ
+// ──────────────────────────────────────────────
+function updateClock() {
+  const d = now();
+  const t = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+  document.getElementById('live-clock').textContent = t;
+}
+
+// ──────────────────────────────────────────────
+// RENDER VIEW: AHORA
+// ──────────────────────────────────────────────
+function renderNow() {
+  const dkey = dayKey();
+  const d = now();
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('now-date').textContent = `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  const nowEl = document.getElementById('now-content');
+  const nextEl = document.getElementById('next-content');
+  const tlEl = document.getElementById('timeline-today');
+
+  if (!dkey) {
+    nowEl.innerHTML = `<div class="free-card"><div class="free-icon">🏖️</div><div class="free-label">Sin clases hoy</div><div class="free-sub">Disfruta el descanso</div></div>`;
+    nextEl.innerHTML = '';
+    tlEl.innerHTML = '';
+    return;
+  }
+
+  const slots = todaySlots(dkey);
+  const cur = currentSlot(slots);
+  const nxt = nextSlot(slots);
+
+  // CARD ACTUAL
+  if (cur) {
+    const col = yearColor(cur.class);
+    const pct = progress(cur).toFixed(1);
+    const rem = remaining(cur);
+    const hasnotes = hasNotes(dkey, cur.id);
+    nowEl.innerHTML = `
+      <div class="current-card" style="--card-color:${col}">
+        <div class="card-label">📍 En este momento</div>
+        <div class="card-class">${cur.display || cur.class || '—'}</div>
+        <div class="card-time">${cur.start} – ${cur.end}</div>
+        <div class="progress-wrap">
+          <div class="progress-header">
+            <span>Progreso</span>
+            <span>${rem} restante</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="prog-fill" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <button class="obs-btn" onclick="openModal('${dkey}','${cur.id}','${(cur.display||cur.class||'').replace(/'/g,"\\'")}','${cur.start} - ${cur.end}')">
+          ✏️ Agregar observación${hasnotes?' <span class="has-notes-badge">con notas</span>':''}
+        </button>
+      </div>`;
+  } else {
+    // ¿Recreo?
+    const cm = currentMinutes();
+    const recS = toMinutes('15:25'), recE = toMinutes('15:40');
+    if (cm>=recS && cm<recE) {
+      nowEl.innerHTML = `<div class="free-card"><div class="free-icon">☕</div><div class="free-label">RECREO</div><div class="free-sub">15:25 – 15:40 · ${remaining({end:'15:40'})} restante</div></div>`;
+    } else if (cm < toMinutes('13:10')) {
+      nowEl.innerHTML = `<div class="free-card"><div class="free-icon">🌅</div><div class="free-label">Antes del turno</div><div class="free-sub">Las clases empiezan a las 13:10</div></div>`;
+    } else if (cm >= toMinutes('18:40')) {
+      nowEl.innerHTML = `<div class="free-card"><div class="free-icon">🌙</div><div class="free-label">Turno terminado</div><div class="free-sub">Hasta mañana</div></div>`;
+    } else {
+      nowEl.innerHTML = `<div class="free-card"><div class="free-icon">☕</div><div class="free-label">Libre disponibilidad</div><div class="free-sub">Sin clase asignada</div></div>`;
+    }
+  }
+
+  // SIGUIENTE
+  if (nxt) {
+    const ncol = yearColor(nxt.class);
+    nextEl.innerHTML = `
+      <div class="next-card" style="--next-color:${ncol}">
+        <div class="next-dot"></div>
+        <div class="next-info">
+          <div class="next-label">Siguiente clase</div>
+          <div class="next-name">${nxt.display || nxt.class}</div>
+          <div class="next-time">${nxt.start} – ${nxt.end}</div>
+        </div>
+        <div class="next-countdown">${untilStart(nxt)}</div>
+      </div>`;
+  } else {
+    nextEl.innerHTML = '';
+  }
+
+  // TIMELINE
+  const cm = currentMinutes();
+  tlEl.innerHTML = slots.filter(s => s.id!=='rec').map(sl => {
+    if (!sl.class) return '';
+    const s = toMinutes(sl.start), e = toMinutes(sl.end);
+    let cls = '';
+    if (cm>=s && cm<e) cls = 'current';
+    else if (s>cm) cls = 'future';
+    else cls = 'past';
+    const col = yearColor(sl.class);
+    return `<div class="timeline-item ${cls}" style="--item-color:${col}">
+      <div class="tl-time">${sl.start}</div>
+      <div class="tl-name">${sl.display || sl.class}</div>
+      <div class="tl-dot"></div>
+    </div>`;
+  }).join('');
+}
+
+// Actualizar barra de progreso sin re-render completo
+function updateProgress() {
+  const dkey = dayKey();
+  if (!dkey) return;
+  const slots = todaySlots(dkey);
+  const cur = currentSlot(slots);
+  const fill = document.getElementById('prog-fill');
+  if (cur && fill) {
+    fill.style.width = progress(cur).toFixed(1)+'%';
+  }
+}
+
+// ──────────────────────────────────────────────
+// RENDER VIEW: DÍA
+// ──────────────────────────────────────────────
+let selectedDay = dayKey() || 'lunes';
+
+function renderDayChips() {
+  const chips = document.getElementById('day-chips');
+  const wdays = ['lunes','martes','miercoles','jueves','viernes'];
+  const labels = ['Lun','Mar','Mié','Jue','Vie'];
+  chips.innerHTML = wdays.map((d,i)=>`
+    <button class="day-chip ${d===selectedDay?'active':''}" onclick="selectDay('${d}')">${labels[i]}</button>
+  `).join('');
+}
+
+function selectDay(d) {
+  selectedDay = d;
+  renderDayChips();
+  renderDayTimeline();
+}
+
+function renderDayTimeline() {
+  const tlEl = document.getElementById('timeline-day');
+  const slots = todaySlots(selectedDay);
+  if (!slots.length) { tlEl.innerHTML='<div class="no-class">Sin horario</div>'; return; }
+  const cm = selectedDay===dayKey() ? currentMinutes() : -1;
+  tlEl.innerHTML = slots.filter(s=>s.id!=='rec').map(sl => {
+    const s = toMinutes(sl.start), e = toMinutes(sl.end);
+    let cls='';
+    if (cm>=0) {
+      if (cm>=s && cm<e) cls='current';
+      else if (s>cm) cls='future';
+    } else cls='future';
+    const col = sl.class ? yearColor(sl.class) : 'var(--border)';
+    const hasnotes = sl.class && hasNotes(selectedDay, sl.id);
+    return `<div class="timeline-item ${cls}" style="--item-color:${col}; cursor:pointer" onclick="${sl.class?`openModal('${selectedDay}','${sl.id}','${(sl.display||sl.class||'').replace(/'/g,"\\'")}','${sl.start} - ${sl.end}')`:''}" >
+      <div class="tl-time">${sl.start}<br><span style="font-size:9px">${sl.end}</span></div>
+      <div class="tl-name">${sl.display || sl.class || '<span style="color:var(--muted);font-style:italic">Libre</span>'}${hasnotes?' <span class="has-notes-badge">📝</span>':''}</div>
+      <div class="tl-dot"></div>
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────
+// RENDER VIEW: SEMANA
+// ──────────────────────────────────────────────
+function renderWeek() {
+  const wdays = ['lunes','martes','miercoles','jueves','viernes'];
+  const labels = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+  const el = document.getElementById('week-content');
+  el.innerHTML = wdays.map((d,i)=>{
+    const slots = todaySlots(d).filter(s=>s.id!=='rec'&&s.class&&!s.class.includes('LIBRE'));
+    if (!slots.length) return `<div class="schedule-section"><div class="year-header"><div class="year-dot" style="background:var(--muted)"></div><div class="year-title" style="color:var(--muted)">${labels[i]}</div></div><div style="color:var(--muted);font-size:13px;padding-left:22px;margin-bottom:16px">Sin clases</div></div>`;
+    return `<div class="schedule-section">
+      <div class="year-header"><div class="year-dot" style="background:var(--accent)"></div><div class="year-title">${labels[i]}</div></div>
+      <div class="schedule-list">
+        ${slots.map(sl=>`<div class="sched-item" style="--item-color:${yearColor(sl.class)}">
+          <div class="sched-left">
+            <div class="sched-class">${sl.display||sl.class}</div>
+            <div class="sched-meta">${sl.start} – ${sl.end}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────
+// RENDER VIEW: HORARIO COMPLETO (por año)
+// ──────────────────────────────────────────────
+function renderFull() {
+  const el = document.getElementById('full-content');
+  const allClasses = [];
+  for (const [d, sch] of Object.entries(SCHEDULE)) {
+    for (const [sid, cls] of Object.entries(sch)) {
+      if (!cls || cls.includes('LIBRE') || cls.includes('COLEGIADA') || cls.includes('ATENCIÓN') || sid==='rec') continue;
+      const sl = SLOTS.find(s=>s.id===sid);
+      if (sl) allClasses.push({day:d, slot:sl, class:cls, display:displayName(cls), year:yearNum(cls)});
+    }
+  }
+
+  const byYear = {1:[],2:[],3:[],4:[],0:[]};
+  allClasses.forEach(c=>{ (byYear[c.year]||byYear[0]).push(c); });
+
+  const yearNames = {1:'1° Año',2:'2° Año',3:'3° Año',4:'4° Año',0:'Otros'};
+  const yearCols = {1:'var(--c1)',2:'var(--c2)',3:'var(--c3)',4:'var(--c4)',0:'var(--ctut)'};
+  const dayOrder = {lunes:0,martes:1,miercoles:2,jueves:3,viernes:4};
+  const dayLabel = {lunes:'Lun',martes:'Mar',miercoles:'Mié',jueves:'Jue',viernes:'Vie'};
+
+  el.innerHTML = [1,2,3,4,0].map(y=>{
+    const cs = byYear[y];
+    if (!cs.length) return '';
+    cs.sort((a,b)=>dayOrder[a.day]-dayOrder[b.day]||(toMinutes(a.slot.start)-toMinutes(b.slot.start)));
+    return `<div class="schedule-section">
+      <div class="year-header">
+        <div class="year-dot" style="background:${yearCols[y]}"></div>
+        <div class="year-title" style="color:${yearCols[y]}">${yearNames[y]}</div>
+      </div>
+      <div class="schedule-list">
+        ${cs.map(c=>`<div class="sched-item" style="--item-color:${yearCols[y]}">
+          <div class="sched-left">
+            <div class="sched-class">${c.display}</div>
+            <div class="sched-meta">${c.slot.start} – ${c.slot.end}</div>
+          </div>
+          <div class="sched-day">${dayLabel[c.day]}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────
+// TABS
+// ──────────────────────────────────────────────
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if (name==='day') { renderDayChips(); renderDayTimeline(); }
+  if (name==='week') renderWeek();
+  if (name==='full') renderFull();
+}
+
+// ──────────────────────────────────────────────
+// MODAL DE NOTAS
+// ──────────────────────────────────────────────
+let modalKey = null;
+
+function noteKey(day, slotId) { return `note_${day}_${slotId}`; }
+
+function hasNotes(day, slotId) {
+  const k = noteKey(day,slotId);
+  const d = JSON.parse(localStorage.getItem(k)||'{}');
+  return !!(d.obs||d.dest||d.inc);
+}
+
+function openModal(day, slotId, className, time) {
+  modalKey = noteKey(day, slotId);
+  document.getElementById('modal-title').textContent = className;
+  document.getElementById('modal-subtitle').textContent = time;
+  const saved = JSON.parse(localStorage.getItem(modalKey)||'{}');
+  document.getElementById('note-obs').value = saved.obs||'';
+  document.getElementById('note-dest').value = saved.dest||'';
+  document.getElementById('note-inc').value = saved.inc||'';
+  renderNotesPreview(saved);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function renderNotesPreview(saved) {
+  const el = document.getElementById('notes-preview');
+  if (!saved||(!saved.obs&&!saved.dest&&!saved.inc)) { el.innerHTML=''; return; }
+  el.innerHTML = `<div class="section-title" style="margin-bottom:8px">Notas guardadas</div>
+    ${saved.obs?`<div class="saved-note-label">Observación</div><div class="saved-note">${saved.obs}</div>`:''}
+    ${saved.dest?`<div class="saved-note-label" style="margin-top:8px">Destacados</div><div class="saved-note">${saved.dest}</div>`:''}
+    ${saved.inc?`<div class="saved-note-label" style="margin-top:8px">Incidencias</div><div class="saved-note">${saved.inc}</div>`:''}`;
+}
+
+function saveNotes() {
+  if (!modalKey) return;
+  const data = {
+    obs: document.getElementById('note-obs').value.trim(),
+    dest: document.getElementById('note-dest').value.trim(),
+    inc: document.getElementById('note-inc').value.trim(),
+    ts: new Date().toISOString()
+  };
+  localStorage.setItem(modalKey, JSON.stringify(data));
+  renderNotesPreview(data);
+  showToast('✓ Notas guardadas');
+}
+
+function closeModal(e) {
+  if (e.target===document.getElementById('modal-overlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderNow();
+  if (document.getElementById('view-day').classList.contains('active')) renderDayTimeline();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+updateClock();
+setInterval(updateClock, 1000);
+renderNow();
+setInterval(()=>{ if(document.getElementById('view-now').classList.contains('active')) { renderNow(); } }, 30000);
+setInterval(updateProgress, 5000);
+</script>
+</body>
+</html>
